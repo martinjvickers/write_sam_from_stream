@@ -27,37 +27,29 @@ int main(int argc, char const ** argv)
 		"HS3:420:C3EHMACXX:8:1101:1353:2143	4	*	0	0	*	*	0	0	TTGATTGGGTATTAAAAATATTTTTTTTTTTTTTTAATATATTTTTTTTAAAAAATCAATTTTTAAACTAAAAATTGATTTTTTTTTATTTTTTTTAAAG	@@??DD>;?AD?DGHIIICHHG@GGIGIEGEA@B##################################################################	YT:Z:UU\n"
 		"HS3:420:C3EHMACXX:8:1101:1272:2165	0	Chr3	12595064	255	100M	*	0	0	ATTGTTTAGTTTTTTAATTAGATTTTTGTTTTTTTTGTATTTATATAATAAATATTTTGTGAGATTGTTTAATTAATATTTATATGAATGTTAATTTGTA	@@CDDEFDD<DFHIIGGIIHGCEGIIIEDAGGIIGIIGIG@HHIIGII@EGHGIFIH:=?CE@DDFEDCECCECD@ADCDEECCD@CDD@CDD3;@DCCD	AS:i:0	XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:100	YT:Z:UU\n";
 
-	Iterator<CharString, Rooted>::Type iter = begin(input);
 
-	StringSet<CharString> referenceNameStore;
-	NameStoreCache<StringSet<CharString> > referenceNameStoreCache(referenceNameStore);
-	BamIOContext<StringSet<CharString> > bamIOContext(referenceNameStore, referenceNameStoreCache);
+        Iterator<CharString, Rooted>::Type iter = begin(input);
 
-	BamFileOut bamFileOut(toCString("meh.sam"));
-	BamHeader header;
-	readHeader(header, bamIOContext, iter, Sam());
-	writeHeader(bamFileOut, header);
+        StringSet<CharString> referenceNameStore;
+        NameStoreCache<StringSet<CharString> > referenceNameStoreCache(referenceNameStore);
+        BamIOContext<StringSet<CharString> > bamIOContext(referenceNameStore, referenceNameStoreCache);
 
-	close(bamFileOut);
+        BamFileOut bamFileOut(toCString("test.sam"));
+        BamHeader header;
+        readHeader(header, bamIOContext, iter, Sam());
+        writeHeader(bamFileOut, header);
 
-	//read in the existing one
-	BamFileIn bamFileIn;	
-	open(bamFileIn, toCString("meh.sam"));
-
-	//create a new one with a context copied
-	BamFileOut bamFileOutAgain(context(bamFileIn), std::cout, Sam());
-
-	String<BamAlignmentRecord> alignments;
-	while (!atEnd(iter))
-	{
-		resize(alignments, length(alignments) + 1);
-		readRecord(back(alignments), bamIOContext, iter, Sam());
-	}
-
-	for(auto& i : alignments)
+        String<BamAlignmentRecord> alignments;
+        while (!atEnd(iter))
         {
-		writeRecord(bamFileOutAgain, i);
-	}
+                resize(alignments, length(alignments) + 1);
+                readRecord(back(alignments), bamIOContext, iter, Sam());
+        }
+
+        for(auto& i : alignments)
+        {
+                writeRecord(bamFileOut, i);
+        }
 
 	return 0;
 }
