@@ -27,18 +27,25 @@ int main(int argc, char const ** argv)
 		"HS3:420:C3EHMACXX:8:1101:1353:2143	4	*	0	0	*	*	0	0	TTGATTGGGTATTAAAAATATTTTTTTTTTTTTTTAATATATTTTTTTTAAAAAATCAATTTTTAAACTAAAAATTGATTTTTTTTTATTTTTTTTAAAG	@@??DD>;?AD?DGHIIICHHG@GGIGIEGEA@B##################################################################	YT:Z:UU\n"
 		"HS3:420:C3EHMACXX:8:1101:1272:2165	0	Chr3	12595064	255	100M	*	0	0	ATTGTTTAGTTTTTTAATTAGATTTTTGTTTTTTTTGTATTTATATAATAAATATTTTGTGAGATTGTTTAATTAATATTTATATGAATGTTAATTTGTA	@@CDDEFDD<DFHIIGGIIHGCEGIIIEDAGGIIGIIGIG@HHIIGII@EGHGIFIH:=?CE@DDFEDCECCECD@ADCDEECCD@CDD@CDD3;@DCCD	AS:i:0	XN:i:0	XM:i:0	XO:i:0	XG:i:0	NM:i:0	MD:Z:100	YT:Z:UU\n";
 
-
+	//create iterator for the input
         Iterator<CharString, Rooted>::Type iter = begin(input);
 
+	//create an empty BamIOContext
         StringSet<CharString> referenceNameStore;
         NameStoreCache<StringSet<CharString> > referenceNameStoreCache(referenceNameStore);
         BamIOContext<StringSet<CharString> > bamIOContext(referenceNameStore, referenceNameStoreCache);
 
+	//create a file
         BamFileOut bamFileOut(toCString("test.sam"));
+	//assign the context to the BamFileOut
+	bamFileOut.context = bamIOContext;
+
+	//create a header and write it to the file
         BamHeader header;
         readHeader(header, bamIOContext, iter, Sam());
         writeHeader(bamFileOut, header);
 
+	//iterate over iterator reading the records and putting them into alignments
         String<BamAlignmentRecord> alignments;
         while (!atEnd(iter))
         {
@@ -46,6 +53,7 @@ int main(int argc, char const ** argv)
                 readRecord(back(alignments), bamIOContext, iter, Sam());
         }
 
+	//go through the alignments writing them out one by one
         for(auto& i : alignments)
         {
                 writeRecord(bamFileOut, i);
